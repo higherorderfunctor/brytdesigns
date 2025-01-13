@@ -1,0 +1,29 @@
+{
+  "name": "@brytdesigns/shopify-hybrid-client-cart",
+  "version": "0.0.1",
+  "description": "A hybrid cart that integrates with the AJAX Cart API and the Storefront Api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsup --clean",
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@effect/vitest": "^0.16.1",
+    "dts-bundle-generator": "^9.5.1",
+    "tsup": "^8.3.5",
+    "typescript": "5.7.3",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "@effect/platform": "^0.71.6",
+    "@effect/platform-browser": "^0.50.6",
+    "@repo/shopify-utils": "workspace:*",
+    "effect": "^3.12.1"
+  }
+}

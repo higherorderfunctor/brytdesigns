@@ -1,0 +1,23 @@
+{
+  "name": "@repo/shopify-utils",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "clean": "git clean -xdf .cache .turbo dist node_modules"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "dts-bundle-generator": "^9.5.1",
+    "tsup": "^8.3.5",
+    "typescript": "5.7.3"
+  },
+  "dependencies": {
+    "effect": "^3.12.1"
+  }
+}
