@@ -1,11 +1,11 @@
 {
   "include": [
-    "src"
+    "../hybrid-cart-client/src"
   ],
   "exclude": [
-    "dist",
-    "node_modules",
-    ".turbo"
+    "../hybrid-cart-client/dist",
+    "../hybrid-cart-client/node_modules",
+    "../hybrid-cart-client/.turbo"
   ],
   "compilerOptions": {
     "esModuleInterop": true,
