@@ -1,4 +1,5 @@
 import * as Resource from "@repo/shopify-utils/effect/Resource";
+import * as AjaxSections from "@repo/shopify-utils/effect/Ajax/Sections";
 import * as Schema from "effect/Schema";
 
 export type Attributes = Schema.Schema.Type<typeof Attributes>;
@@ -175,10 +176,18 @@ export const Cart = Schema.Struct({
   cart_level_discount_applications: Schema.Array(DiscountApplication),
 });
 
-export const BundledSectionInput = Schema.Struct({
-  sections: Schema.optional(Schema.String),
-  sections_url: Schema.optional(Schema.String),
-});
+export const makeCartSchema = (sections?: string) => {
+  if (sections) {
+    Schema.Struct({
+      ...Cart.fields,
+      sections: AjaxSections.makeResponseSchema(sections),
+    });
+  }
+  return Schema.Struct({
+    ...Cart.fields,
+    sections: Schema.optionalWith(Schema.Null, { default: () => null }),
+  });
+};
 
 export type AddItemInput = Schema.Schema.Encoded<typeof AddItemInput>;
 export const AddItemInput = Schema.Struct({
@@ -188,41 +197,40 @@ export const AddItemInput = Schema.Struct({
   selling_plan: Schema.optional(Resource.ID),
 });
 
-export type CartAddInput = Schema.Schema.Encoded<typeof CartAddInput>;
-export const CartAddInput = Schema.extend(BundledSectionInput)(
-  Schema.Struct({
-    items: Schema.Array(AddItemInput),
-  }),
-);
+export const BaseInput = Schema.extend(AjaxSections.Input);
 
+export type CartAddInput = Schema.Schema.Encoded<typeof CartAddInput>;
+export const CartAddInput = Schema.Struct({
+  items: Schema.Array(AddItemInput),
+}).pipe(BaseInput);
+
+export type UpdateItemRecordInput = Schema.Schema.Encoded<
+  typeof UpdateItemRecordInput
+>;
 export const UpdateItemRecordInput = Schema.Record({
   key: Schema.String,
   value: Schema.Number,
 });
 
 export type CartUpdateInput = Schema.Schema.Encoded<typeof CartUpdateInput>;
-export const CartUpdateInput = Schema.extend(BundledSectionInput)(
-  Schema.Struct({
-    updates: Schema.optional(
-      Schema.Union(UpdateItemRecordInput, Schema.Array(Schema.Number)),
-    ),
-    note: Schema.optional(Schema.NullOr(Schema.String)),
-    attributes: Schema.optional(Attributes),
-  }),
-);
+export const CartUpdateInput = Schema.Struct({
+  updates: Schema.optional(
+    Schema.Union(UpdateItemRecordInput, Schema.Array(Schema.Number)),
+  ),
+  note: Schema.optional(Schema.NullOr(Schema.String)),
+  attributes: Schema.optional(Attributes),
+}).pipe(BaseInput);
 
-export const CartChangeItemOptionalInput = Schema.extend(BundledSectionInput)(
-  Schema.Struct({
-    quantity: Schema.optional(Schema.Number),
-    properties: Schema.optional(
-      Schema.Record({
-        key: Schema.String,
-        value: Schema.NullOr(Schema.String),
-      }),
-    ),
-    selling_plan: Schema.optional(Schema.NullOr(Resource.ID)),
-  }),
-);
+export const CartChangeItemOptionalInput = Schema.Struct({
+  quantity: Schema.optional(Schema.Number),
+  properties: Schema.optional(
+    Schema.Record({
+      key: Schema.String,
+      value: Schema.NullOr(Schema.String),
+    }),
+  ),
+  selling_plan: Schema.optional(Schema.NullOr(Resource.ID)),
+}).pipe(BaseInput);
 
 export type CartChangeInput = Schema.Schema.Encoded<typeof CartChangeInput>;
 export const CartChangeInput = Schema.Union(
@@ -237,3 +245,9 @@ export const CartChangeInput = Schema.Union(
     }),
   ),
 );
+
+export type CartClearInput = Schema.Schema.Encoded<typeof CartClearInput>;
+export const CartClearInput = AjaxSections.Input;
+
+export type CartGetInput = Schema.Schema.Encoded<typeof CartClearInput>;
+export const CartGetInput = AjaxSections.Input;

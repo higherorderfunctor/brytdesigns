@@ -1,11 +1,11 @@
 {
   "include": [
-    "../hybrid-cart-client/src"
+    "../ajax-cart-api/src"
   ],
   "exclude": [
-    "../hybrid-cart-client/dist",
-    "../hybrid-cart-client/node_modules",
-    "../hybrid-cart-client/.turbo"
+    "../ajax-cart-api/dist",
+    "../ajax-cart-api/node_modules",
+    "../ajax-cart-api/.turbo"
   ],
   "compilerOptions": {
     "esModuleInterop": true,

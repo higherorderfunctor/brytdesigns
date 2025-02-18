@@ -1,5 +1,5 @@
 {
-  "name": "@brytdesigns/shopify-hybrid-client-cart",
+  "name": "@brytdesigns/shopify-hybrid-cart-client",
   "version": "0.0.1",
   "description": "A hybrid cart that integrates with the AJAX Cart API and the Storefront Api",
   "main": "index.js",
