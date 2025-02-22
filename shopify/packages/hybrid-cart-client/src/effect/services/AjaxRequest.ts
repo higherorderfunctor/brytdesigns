@@ -4,12 +4,16 @@ import * as Function from "effect/Function";
 import * as HttpClient from "@effect/platform/HttpClient";
 import * as HttpClientResponse from "@effect/platform/HttpClientResponse";
 import * as HttpClientRequest from "@effect/platform/HttpClientRequest";
+import * as FetchHttpClient from "@effect/platform/FetchHttpClient";
+import * as Layer from "effect/Layer";
+import * as LogLevel from "effect/LogLevel";
 
 import * as AjaxSections from "@repo/shopify-utils/effect/Ajax/Sections";
 import { ShopifyRoutes } from "@repo/shopify-utils/effect";
 
+import * as LoggerUtils from "./LoggerUtils.js";
 import { CartError } from "../errors.js";
-import { makeCartSchema } from "../schema.js";
+import { Cart, makeCartSchema } from "../schema.js";
 import { AjaxClientResponse } from "../data";
 
 export const makeFactory =
@@ -29,10 +33,10 @@ export const makeFactory =
     >;
     inputSchema: Schema.Schema<A, I, R>;
   }) =>
-    <Input extends Schema.Schema<A, I, R>["Encoded"]>(input: Input) =>
-      Effect.gen(function*() {
+    (input?: Schema.Schema<A, I, R>["Encoded"]) =>
+      Effect.gen(function* () {
         const client = yield* HttpClient.HttpClient;
-        const decodedInput = yield* Schema.decode(inputSchema)(input);
+        const decodedInput = yield* Schema.decodeUnknown(inputSchema)(input);
         const routes = new ShopifyRoutes();
         const route = routes[routeName];
         const schema = makeCartSchema(decodedInput.sections);
@@ -60,17 +64,56 @@ export const makeFactory =
           ),
         );
 
+        if (decodedInput.sections) {
+          const json = yield* Function.pipe(
+            response,
+            HttpClientResponse.schemaBodyJson(
+              Schema.Struct({
+                ...Cart.fields,
+                sections: AjaxSections.makeResponseSchema(decodedInput.sections),
+              }),
+            ),
+          );
+          const clientResponse = AjaxClientResponse.make({
+            data: json,
+          });
+
+          yield* Effect.annotateLogsScoped({
+            method,
+            route,
+            input: decodedInput,
+            ouput: clientResponse,
+          });
+
+          return clientResponse;
+        }
+
         const json = yield* Function.pipe(
           response,
-          HttpClientResponse.schemaBodyJson(schema),
+          HttpClientResponse.schemaBodyJson(
+            Schema.Struct({
+              ...Cart.fields,
+              sections: Schema.optionalWith(Schema.Null, { default: () => null }),
+            }),
+          ),
         );
 
-        return AjaxClientResponse.make({
+        const clientResponse = AjaxClientResponse.make({
           data: json,
         });
+
+        yield* Effect.annotateLogsScoped({
+          method,
+          route,
+          input: decodedInput,
+          output: clientResponse,
+        });
+
+        return clientResponse;
       }).pipe(
+        Effect.provide(LoggerUtils.Default),
         Effect.catchAll((error) => {
-          if (error._tag === "@brytdesigns/ajax-cart-api/CartError") {
+          if (error._tag === "@brytdesigns/hybrid-cart-client/CartError") {
             return Effect.succeed(
               AjaxClientResponse.make({
                 error: error,
@@ -79,4 +122,9 @@ export const makeFactory =
           }
           return Effect.fail(error);
         }),
+        LoggerUtils.withNamespacedLogSpan(
+          routeName.replace("_url", "").replace("_", "."),
+        ),
       );
+
+export const Default = Layer.mergeAll(FetchHttpClient.layer);

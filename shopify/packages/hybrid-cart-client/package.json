@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsup --clean",
     "dev": "tsx src/index.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "codegen": "graphql-codegen"
   },
   "type": "module",
   "keywords": [],
@@ -15,15 +16,17 @@
   "license": "ISC",
   "devDependencies": {
     "@effect/vitest": "^0.16.1",
+    "@graphql-codegen/cli": "^5.0.5",
+    "@solidifront/codegen": "^1.0.7",
     "dts-bundle-generator": "^9.5.1",
     "tsup": "^8.3.5",
-    "typescript": "5.7.3",
     "vitest": "^2.1.8"
   },
   "dependencies": {
     "@effect/platform": "^0.71.6",
     "@effect/platform-browser": "^0.50.6",
     "@repo/shopify-utils": "workspace:*",
+    "@solidifront/storefront-client": "^0.2.2",
     "effect": "^3.12.1"
   }
 }

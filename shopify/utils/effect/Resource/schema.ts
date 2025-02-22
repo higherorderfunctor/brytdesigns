@@ -2,6 +2,7 @@ import * as Schema from "effect/Schema";
 
 export type Type = Schema.Schema.Type<typeof Type>;
 export const Type = Schema.Literal(
+  "Cart",
   "Collection",
   "Customer",
   "DeliveryCarrierService",

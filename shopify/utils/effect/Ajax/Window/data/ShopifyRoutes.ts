@@ -1,25 +1,6 @@
-import * as Data from "effect/Data";
+import type { IShopifyRoutes } from "./types";
 
-export interface IShopifyRoutes {
-  readonly account_addresses_url: string;
-  readonly account_login_url: string;
-  readonly account_logout_url: string;
-  readonly account_recover_url: string;
-  readonly account_register_url: string;
-  readonly account_url: string;
-  readonly all_products_collection_url: string;
-  readonly cart_add_url: string;
-  readonly cart_change_url: string;
-  readonly cart_clear_url: string;
-  readonly cart_update_url: string;
-  readonly cart_url: string;
-  readonly collections_url: string;
-  readonly predictive_search_url: string;
-  readonly product_recommendations_url: string;
-  readonly root_url: string;
-  readonly search_url: string;
-  readonly storefront_login_url: string;
-}
+import * as Data from "effect/Data";
 
 export const Defaults: IShopifyRoutes = {
   account_addresses_url: "/account/addresses",
@@ -29,11 +10,11 @@ export const Defaults: IShopifyRoutes = {
   account_register_url: "/account/register",
   account_url: "/account",
   all_products_collection_url: "/collections/all",
-  cart_add_url: "/cart/add",
-  cart_change_url: "/cart/change",
-  cart_clear_url: "/cart/clear",
-  cart_update_url: "/cart/update",
-  cart_url: "/cart",
+  cart_add_url: "/cart/add.js",
+  cart_change_url: "/cart/change.js",
+  cart_clear_url: "/cart/clear.js",
+  cart_update_url: "/cart/update.js",
+  cart_url: "/cart.js",
   collections_url: "/collections",
   predictive_search_url: "/search/suggest",
   product_recommendations_url: "/recommendations/products",
@@ -49,13 +30,5 @@ export class ShopifyRoutes extends Data.Class<IShopifyRoutes> {
       ...Defaults,
       ...window.Shopify.routes,
     });
-  }
-}
-
-declare global {
-  interface Window {
-    Shopify: {
-      routes: IShopifyRoutes;
-    };
   }
 }

@@ -11,6 +11,6 @@ export class AjaxClientResponse<TData = any> extends Data.Class<
   IAjaxClientResponse<TData>
 > { }
 
-export const make = <TData = any>(
+export const make = <TData = undefined>(
   data: Parameters<ReturnType<typeof Data.case<AjaxClientResponse<TData>>>>[0],
 ) => Data.case<AjaxClientResponse<TData>>()(data);

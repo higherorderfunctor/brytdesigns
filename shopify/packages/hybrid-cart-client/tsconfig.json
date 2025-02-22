@@ -1,11 +1,11 @@
 {
   "include": [
-    "../ajax-cart-api/src"
+    "src/**/*.ts"
   ],
   "exclude": [
-    "../ajax-cart-api/dist",
-    "../ajax-cart-api/node_modules",
-    "../ajax-cart-api/.turbo"
+    "dist",
+    "node_modules",
+    ".turbo"
   ],
   "compilerOptions": {
     "esModuleInterop": true,

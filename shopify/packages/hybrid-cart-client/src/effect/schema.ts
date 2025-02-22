@@ -178,9 +178,12 @@ export const Cart = Schema.Struct({
 
 export const makeCartSchema = (sections?: string) => {
   if (sections) {
-    Schema.Struct({
+    return Schema.Struct({
       ...Cart.fields,
-      sections: AjaxSections.makeResponseSchema(sections),
+      sections: Schema.optionalWith(
+        Schema.NullOr(AjaxSections.makeResponseSchema(sections)),
+        { default: () => null },
+      ),
     });
   }
   return Schema.Struct({
@@ -251,3 +254,10 @@ export const CartClearInput = AjaxSections.Input;
 
 export type CartGetInput = Schema.Schema.Encoded<typeof CartClearInput>;
 export const CartGetInput = AjaxSections.Input;
+
+export type CartUpdateDiscountsInput = Schema.Schema.Encoded<
+  typeof CartUpdateDiscountsInput
+>;
+export const CartUpdateDiscountsInput = Schema.mutable(
+  Schema.Array(Schema.NonEmptyString),
+);
