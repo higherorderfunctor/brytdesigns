@@ -4,7 +4,7 @@ import * as LogLevel from "effect/LogLevel";
 
 export const filterLevelOrNever = <A, E, R>(
   level: LogLevel.LogLevel,
-  effect: Effect.Effect<A, E, R>,
+  effect: Effect.Effect<A, E, R>
 ) =>
   Effect.gen(function* () {
     const logLevel = yield* FiberRef.get(FiberRef.currentMinimumLogLevel);

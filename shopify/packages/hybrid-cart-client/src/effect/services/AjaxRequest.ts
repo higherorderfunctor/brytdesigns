@@ -6,21 +6,29 @@ import * as HttpClientResponse from "@effect/platform/HttpClientResponse";
 import * as HttpClientRequest from "@effect/platform/HttpClientRequest";
 import * as FetchHttpClient from "@effect/platform/FetchHttpClient";
 import * as Layer from "effect/Layer";
-import * as LogLevel from "effect/LogLevel";
 
 import * as AjaxSections from "@repo/shopify-utils/effect/Ajax/Sections";
 import { ShopifyRoutes } from "@repo/shopify-utils/effect";
 
 import * as LoggerUtils from "./LoggerUtils.js";
-import { CartError } from "../errors.js";
-import { Cart, makeCartSchema } from "../schema.js";
+import { CartError, InvalidAjaxMethodError } from "../errors.js";
 import { AjaxClientResponse } from "../data";
 
+const BaseOutputSchema = Schema.Struct({});
+
 export const makeFactory =
-  <A extends typeof AjaxSections.Input.Type, I, R>({
+  <
+    A extends typeof AjaxSections.Input.Type,
+    I,
+    R,
+    B extends typeof BaseOutputSchema.Type,
+    J,
+    S,
+  >({
     inputSchema,
     routeName,
     method,
+    outputSchema,
   }: {
     method: keyof Pick<typeof HttpClientRequest, "post" | "get">;
     routeName: keyof Pick<
@@ -32,6 +40,7 @@ export const makeFactory =
       | "cart_clear_url"
     >;
     inputSchema: Schema.Schema<A, I, R>;
+    outputSchema: Schema.Schema<B, J, S>;
   }) =>
     (input?: Schema.Schema<A, I, R>["Encoded"]) =>
       Effect.gen(function* () {
@@ -39,7 +48,6 @@ export const makeFactory =
         const decodedInput = yield* Schema.decodeUnknown(inputSchema)(input);
         const routes = new ShopifyRoutes();
         const route = routes[routeName];
-        const schema = makeCartSchema(decodedInput.sections);
 
         let request: HttpClientRequest.HttpClientRequest;
 
@@ -51,9 +59,10 @@ export const makeFactory =
           request = HttpClientRequest.get(route, {
             acceptJson: true,
           }).pipe(HttpClientRequest.setUrlParams(decodedInput));
+        } else {
+          return yield* Effect.fail(new InvalidAjaxMethodError());
         }
 
-        //@ts-ignore
         const response = yield* client.execute(request).pipe(
           Effect.filterOrFail(
             (res) => res.status !== 200,
@@ -65,15 +74,19 @@ export const makeFactory =
         );
 
         if (decodedInput.sections) {
-          const json = yield* Function.pipe(
-            response,
-            HttpClientResponse.schemaBodyJson(
+          const output = outputSchema.pipe(
+            Schema.extend(
               Schema.Struct({
-                ...Cart.fields,
                 sections: AjaxSections.makeResponseSchema(decodedInput.sections),
               }),
             ),
           );
+
+          const json = yield* Function.pipe(
+            response,
+            HttpClientResponse.schemaBodyJson(output),
+          );
+
           const clientResponse = AjaxClientResponse.make({
             data: json,
           });
@@ -88,14 +101,17 @@ export const makeFactory =
           return clientResponse;
         }
 
-        const json = yield* Function.pipe(
-          response,
-          HttpClientResponse.schemaBodyJson(
+        const output = outputSchema.pipe(
+          Schema.extend(
             Schema.Struct({
-              ...Cart.fields,
               sections: Schema.optionalWith(Schema.Null, { default: () => null }),
             }),
           ),
+        );
+
+        const json = yield* Function.pipe(
+          response,
+          HttpClientResponse.schemaBodyJson(output),
         );
 
         const clientResponse = AjaxClientResponse.make({
@@ -111,6 +127,7 @@ export const makeFactory =
 
         return clientResponse;
       }).pipe(
+        Effect.scoped,
         Effect.provide(LoggerUtils.Default),
         Effect.catchAll((error) => {
           if (error._tag === "@brytdesigns/hybrid-cart-client/CartError") {

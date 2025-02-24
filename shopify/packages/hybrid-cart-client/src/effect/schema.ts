@@ -207,6 +207,11 @@ export const CartAddInput = Schema.Struct({
   items: Schema.Array(AddItemInput),
 }).pipe(BaseInput);
 
+export type CartAddOutput = Schema.Schema.Type<typeof CartAddOutput>;
+export const CartAddOutput = Schema.Struct({
+  items: Schema.Array(LineItem),
+});
+
 export type UpdateItemRecordInput = Schema.Schema.Encoded<
   typeof UpdateItemRecordInput
 >;
@@ -223,6 +228,14 @@ export const CartUpdateInput = Schema.Struct({
   note: Schema.optional(Schema.NullOr(Schema.String)),
   attributes: Schema.optional(Attributes),
 }).pipe(BaseInput);
+
+export type CartUpdateOutput = Schema.Schema.Type<typeof CartUpdateOutput>;
+export const CartUpdateOutput = Schema.Struct({
+  ...Cart.fields,
+  items_changelog: Schema.Struct({
+    added: Schema.Array(LineItem),
+  }),
+});
 
 export const CartChangeItemOptionalInput = Schema.Struct({
   quantity: Schema.optional(Schema.Number),
@@ -248,6 +261,13 @@ export const CartChangeInput = Schema.Union(
     }),
   ),
 );
+
+export type CartChangeOutput = Schema.Schema.Type<typeof CartChangeOutput>;
+export const CartChangeOutput = Schema.Struct({
+  ...Cart.fields,
+  items_added: Schema.Array(LineItem),
+  items_removed: Schema.Array(LineItem),
+});
 
 export type CartClearInput = Schema.Schema.Encoded<typeof CartClearInput>;
 export const CartClearInput = AjaxSections.Input;

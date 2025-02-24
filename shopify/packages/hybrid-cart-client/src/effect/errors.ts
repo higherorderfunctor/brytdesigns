@@ -7,3 +7,13 @@ export class CartError extends Data.TaggedError(
   message: string;
   description: string;
 }> { }
+
+export class InvalidAjaxMethodError extends Data.TaggedError(
+  "@brytdesigns/hybrid-cart-client/InvalidAjaxMethodError",
+)<{
+  message: string;
+}> {
+  constructor() {
+    super({ message: "Invalid HTTP method | Allowed: 'get' or 'post'" });
+  }
+}
