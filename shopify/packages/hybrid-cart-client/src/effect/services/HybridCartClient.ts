@@ -38,7 +38,7 @@ export const make = Effect.gen(function* () {
   const updateDiscounts = (discountCodes: CartUpdateDiscountsInput) =>
     Effect.gen(function* () {
       const codes = yield* Schema.decode(CartUpdateDiscountsInput)(
-        discountCodes
+        discountCodes,
       );
 
       const initialCart = yield* CartGet.make();
@@ -66,7 +66,7 @@ export const make = Effect.gen(function* () {
             discountCodes: codes,
             id,
           },
-        }
+        },
       );
 
       if (response.errors) {
@@ -100,7 +100,7 @@ export const make = Effect.gen(function* () {
       return yield* CartGet.make();
     }).pipe(
       Effect.provide(LoggerUtils.Default),
-      LoggerUtils.withNamespacedLogSpan("discounts.update")
+      LoggerUtils.withNamespacedLogSpan("discounts.update"),
     );
 
   return {
@@ -117,5 +117,5 @@ export const make = Effect.gen(function* () {
 
 export const Default = Layer.mergeAll(
   StorefrontClient.layer,
-  AjaxRequest.Default
+  AjaxRequest.Default,
 );

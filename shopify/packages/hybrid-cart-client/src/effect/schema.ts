@@ -58,7 +58,7 @@ export type SellingPlanAllocationPriceAdjustment = Schema.Schema.Type<
 >;
 export const SellingPlanAllocationPriceAdjustment = Schema.Struct({
   position: Schema.Number,
-  value: Schema.Number,
+  price: Schema.Number,
 });
 
 export const SellingPlanPriceAdjustment = Schema.Struct({
@@ -81,8 +81,12 @@ export const SellingPlan = Schema.Struct({
   name: Schema.String,
   description: Schema.NullOr(Schema.String),
   options: Schema.Array(SellingPlanOption),
-  recurring_deliveries: Schema.Boolean,
-  fixed_selling_plan: Schema.Boolean,
+  recurring_deliveries: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
+  fixed_selling_plan: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
   price_adjustments: Schema.Array(SellingPlanPriceAdjustment),
 });
 
@@ -119,7 +123,9 @@ export const UnitPriceMeasurement = Schema.Struct({
 export type LineItem = Schema.Schema.Type<typeof LineItem>;
 export const LineItem = Schema.Struct({
   id: Resource.ID,
-  properties: Attributes,
+  properties: Schema.optionalWith(Schema.NullOr(Attributes), {
+    default: () => null,
+  }),
   quantity: Schema.Number,
   variant_id: Resource.ID,
   key: Schema.String,
@@ -130,8 +136,8 @@ export const LineItem = Schema.Struct({
   line_price: Schema.Number,
   original_line_price: Schema.Number,
   total_discount: Schema.Number,
-  discounts: Schema.Array(Discount),
-  sku: Schema.String,
+  discounts: Schema.optionalWith(Schema.Array(Discount), { default: () => [] }),
+  sku: Schema.NullOr(Schema.String),
   grams: Schema.Number,
   vendor: Schema.String,
   taxable: Schema.Boolean,
@@ -140,7 +146,7 @@ export const LineItem = Schema.Struct({
   gift_card: Schema.Boolean,
   final_line_price: Schema.Number,
   final_price: Schema.Number,
-  url: Schema.URL,
+  url: Schema.String,
   featured_image: Schema.optional(Image),
   image: Schema.URL,
   handle: Schema.String,
@@ -154,10 +160,13 @@ export const LineItem = Schema.Struct({
   line_level_discount_allocations: Schema.Array(LineLevelDiscountAllocation),
   line_level_total_discount: Schema.Number,
   quantity_rule: Schema.optional(QuantityRule),
-  has_components: Schema.Boolean,
+  has_components: Schema.optionalWith(Schema.Boolean, { default: () => false }),
   unit_price: Schema.optional(Schema.Number),
   unit_price_measurement: Schema.optional(UnitPriceMeasurement),
-  selling_plan_allocation: Schema.optional(SellingPlanAllocation),
+  selling_plan_allocation: Schema.optionalWith(
+    Schema.NullOr(SellingPlanAllocation),
+    { default: () => null },
+  ),
 });
 
 export const Cart = Schema.Struct({
@@ -265,8 +274,12 @@ export const CartChangeInput = Schema.Union(
 export type CartChangeOutput = Schema.Schema.Type<typeof CartChangeOutput>;
 export const CartChangeOutput = Schema.Struct({
   ...Cart.fields,
-  items_added: Schema.Array(LineItem),
-  items_removed: Schema.Array(LineItem),
+  items_added: Schema.optionalWith(Schema.Array(LineItem), {
+    default: () => [],
+  }),
+  items_removed: Schema.optionalWith(Schema.Array(LineItem), {
+    default: () => [],
+  }),
 });
 
 export type CartClearInput = Schema.Schema.Encoded<typeof CartClearInput>;

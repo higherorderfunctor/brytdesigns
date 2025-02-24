@@ -7,41 +7,91 @@ import * as HybridCartClient from "../src/effect/services/HybridCartClient";
 import * as HttpClientResponse from "@effect/platform/HttpClientResponse";
 
 const OneItemAddToCartResponse = {
+  sections: {
+    "cart-test": "",
+  },
   items: [
     {
-      id: 36110175633573,
-      title: "Red Rain Coat - Small",
-      key: "794864229:03af7a8cb59a4c3c45595c76fa8cb53c",
-      price: 12900,
-      line_price: 12900,
-      quantity: 2,
-      sku: null,
+      id: 36323170943141,
+      properties: null,
+      quantity: 1,
+      variant_id: 36323170943141,
+      key: "36323170943141:322e2af74da821ca095964e07b7270b5",
+      title: "Great Granola Bar",
+      price: 1700,
+      original_price: 1700,
+      discounted_price: 1700,
+      line_price: 1700,
+      original_line_price: 1700,
+      total_discount: 0,
+      discounts: [],
+      sku: "",
       grams: 0,
-      vendor: "Shopify",
-      variant_id: 794864229,
+      vendor: "shopify",
+      taxable: true,
+      product_id: 5680114172069,
+      product_has_only_default_variant: true,
       gift_card: false,
-      url: "/products/red-rain-coat?variant=794864229",
+      final_price: 1700,
+      final_line_price: 1700,
+      url: "/products/great-granola-bar?selling_plan=6717605/u0026variant=36323170943141",
       featured_image: {
-        url: "http://cdn.shopify.com/s/files/1/0040/7092/products/red-rain-coat.jpeg?v=1402604893",
-        aspect_ratio: 1.0,
-        alt: "Red rain coat with a hood",
+        aspect_ratio: 1.504,
+        alt: "Great Granola Bar",
+        height: 1277,
+        url: "https://cdn.shopify.com/s/files/1/0401/3218/2181/products/fallon-michael-h2UH2674Bg4-unsplash.jpg?v=1600796940",
+        width: 1920,
       },
       image:
-        "http://cdn.shopify.com/s/files/1/0040/7092/products/red-rain-coat.jpeg?v=1402604893",
-      handle: "red-rain-coat",
+        "https://cdn.shopify.com/s/files/1/0401/3218/2181/products/fallon-michael-h2UH2674Bg4-unsplash.jpg?v=1600796940",
+      handle: "great-granola-bar",
       requires_shipping: true,
-      product_title: "Red Rain Coat",
-      product_description: "A bright red rain coat for rainy days!",
-      product_type: "Coat",
-      properties: null,
-      variant_title: "Red",
-      variant_options: ["Red"],
+      product_type: "",
+      product_title: "Great Granola Bar",
+      product_description:
+        "The great granola bar, everyone has been talking about it. Subscribe when you can!",
+      variant_title: null,
+      variant_options: ["Default Title"],
       options_with_values: [
         {
-          name: "Color",
-          value: "Red",
+          name: "Title",
+          value: "Default Title",
         },
       ],
+      line_level_discount_allocations: [],
+      line_level_total_discount: 0,
+      selling_plan_allocation: {
+        price_adjustments: [
+          {
+            position: 1,
+            price: 1700,
+          },
+        ],
+        price: 1700,
+        compare_at_price: 2000,
+        per_delivery_price: 1700,
+        selling_plan: {
+          id: 6717605,
+          name: "Delivered every week",
+          description: null,
+          options: [
+            {
+              name: "Delivery every",
+              position: 1,
+              value: "1 Week(s)",
+            },
+          ],
+          recurring_deliveries: true,
+          price_adjustments: [
+            {
+              order_count: null,
+              position: 1,
+              value_type: "percentage",
+              value: 15,
+            },
+          ],
+        },
+      },
     },
   ],
 };
@@ -210,6 +260,9 @@ const multipleItemResponseLayer = Layer.mergeAll(
 
 describe("add item/items to cart responses", () => {
   vi.stubGlobal("window", {
+    location: {
+      origin: "https://example.com",
+    },
     Shopify: {
       storefront: {
         config: {
@@ -227,6 +280,7 @@ describe("add item/items to cart responses", () => {
     const program = Effect.gen(function* () {
       const client = yield* HybridCartClient.make;
       return yield* client.add({
+        sections: "cart-test",
         items: [
           {
             id: 36323170943141,

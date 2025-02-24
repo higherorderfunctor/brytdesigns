@@ -48,30 +48,39 @@ export const makeFactory =
         const decodedInput = yield* Schema.decodeUnknown(inputSchema)(input);
         const routes = new ShopifyRoutes();
         const route = routes[routeName];
+        const url = `${window.location.origin}${route}`;
 
         let request: HttpClientRequest.HttpClientRequest;
 
         if (method === "post") {
-          request = yield* HttpClientRequest.post(route, {
+          request = yield* HttpClientRequest.post(url, {
             acceptJson: true,
           }).pipe(HttpClientRequest.bodyJson(decodedInput));
         } else if (method === "get") {
-          request = HttpClientRequest.get(route, {
+          request = HttpClientRequest.get(url, {
             acceptJson: true,
           }).pipe(HttpClientRequest.setUrlParams(decodedInput));
         } else {
           return yield* Effect.fail(new InvalidAjaxMethodError());
         }
 
-        const response = yield* client.execute(request).pipe(
-          Effect.filterOrFail(
-            (res) => res.status !== 200,
-            (res) => {
-              const data = Effect.runSync(res.json) as CartError;
-              return new CartError(data);
-            },
-          ),
-        );
+        // TODO: Figure out how to handle invalid responses
+        const response = yield* client
+          .execute(request)
+          .pipe
+          // Effect.filterOrFail(
+          //   (res) => res.status !== 200,
+          //   (res) =>
+          //     Effect.gen(function* () {
+          //       const data = (yield* res.json) as CartError;
+          //       return new CartError({
+          //         status: 300,
+          //         message: "Invalid response",
+          //         description: "Unexpected response from the server",
+          //       });
+          //     }),
+          // ),
+          ();
 
         if (decodedInput.sections) {
           const output = outputSchema.pipe(
@@ -95,8 +104,10 @@ export const makeFactory =
             method,
             route,
             input: decodedInput,
-            ouput: clientResponse,
+            output: clientResponse,
           });
+
+          yield* Effect.logInfo("Request");
 
           return clientResponse;
         }
@@ -125,23 +136,27 @@ export const makeFactory =
           output: clientResponse,
         });
 
+        yield* Effect.logInfo("Request");
+
         return clientResponse;
       }).pipe(
         Effect.scoped,
-        Effect.provide(LoggerUtils.Default),
         Effect.catchAll((error) => {
-          if (error._tag === "@brytdesigns/hybrid-cart-client/CartError") {
-            return Effect.succeed(
-              AjaxClientResponse.make({
-                error: error,
-              }),
-            );
-          }
+          // if (error._tag === "@brytdesigns/hybrid-cart-client/CartError") {
+          //   return Effect.succeed(
+          //     AjaxClientResponse.make({
+          //       error: error,
+          //     }),
+          //   );
+          // }
           return Effect.fail(error);
         }),
         LoggerUtils.withNamespacedLogSpan(
-          routeName.replace("_url", "").replace("_", "."),
+          routeName.replace("_url", "").replace("_", ":"),
         ),
       );
 
-export const Default = Layer.mergeAll(FetchHttpClient.layer);
+export const Default = Layer.mergeAll(
+  FetchHttpClient.layer,
+  LoggerUtils.Default,
+);
