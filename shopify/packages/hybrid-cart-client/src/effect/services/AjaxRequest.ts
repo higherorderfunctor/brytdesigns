@@ -43,7 +43,7 @@ export const makeFactory =
     outputSchema: Schema.Schema<B, J, S>;
   }) =>
     (input?: Schema.Schema<A, I, R>["Encoded"]) =>
-      Effect.gen(function* () {
+      Effect.gen(function*() {
         const client = yield* HttpClient.HttpClient;
         const decodedInput = yield* Schema.decodeUnknown(inputSchema)(input);
         const routes = new ShopifyRoutes();
@@ -64,23 +64,14 @@ export const makeFactory =
           return yield* Effect.fail(new InvalidAjaxMethodError());
         }
 
-        // TODO: Figure out how to handle invalid responses
-        const response = yield* client
-          .execute(request)
-          .pipe
-          // Effect.filterOrFail(
-          //   (res) => res.status !== 200,
-          //   (res) =>
-          //     Effect.gen(function* () {
-          //       const data = (yield* res.json) as CartError;
-          //       return new CartError({
-          //         status: 300,
-          //         message: "Invalid response",
-          //         description: "Unexpected response from the server",
-          //       });
-          //     }),
-          // ),
-          ();
+        const response = yield* client.execute(request);
+
+        if (response.status !== 200) {
+          const data = (yield* response.json) as CartError;
+          return AjaxClientResponse.make({
+            error: new CartError(data),
+          });
+        }
 
         if (decodedInput.sections) {
           const output = outputSchema.pipe(
