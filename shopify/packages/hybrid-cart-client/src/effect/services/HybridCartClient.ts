@@ -3,6 +3,7 @@ import * as Schema from "effect/Schema";
 import * as StorefrontClient from "@solidifront/storefront-client/effect";
 import * as Layer from "effect/Layer";
 import * as Resource from "@repo/shopify-utils/effect/Resource";
+import * as Context from "effect/Context";
 import { StorefrontClientConfig } from "@repo/shopify-utils/effect/Ajax/Window";
 
 import * as AjaxRequest from "./AjaxRequest.js";
@@ -114,6 +115,10 @@ export const make = Effect.gen(function* () {
     },
   };
 });
+
+export class HybridCartClient extends Context.Tag(
+  "@brytdesigns/hybrid-cart-client/HybridCartClient",
+)<HybridCartClient, typeof make>() {}
 
 export const Default = Layer.mergeAll(
   StorefrontClient.layer,

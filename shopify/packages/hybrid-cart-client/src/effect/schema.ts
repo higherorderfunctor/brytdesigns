@@ -19,7 +19,7 @@ export const DiscountApplication = Schema.Struct({
   title: Schema.NonEmptyString,
   total_allocated_amount: Schema.Number,
   type: Schema.Literal("automatic", "discount_code", "manual", "script"),
-  value: Schema.Number,
+  value: Schema.NumberFromString,
   value_type: Schema.Literal("fixed_amount", "percentage"),
 });
 
@@ -238,11 +238,17 @@ export const CartUpdateInput = Schema.Struct({
   attributes: Schema.optional(Attributes),
 }).pipe(BaseInput);
 
+export type ItemAddedChangelog = Schema.Schema.Type<typeof ItemAddedChangelog>;
+export const ItemAddedChangelog = Schema.Struct({
+  variant_id: Schema.Number,
+  quantity: Schema.Number,
+});
+
 export type CartUpdateOutput = Schema.Schema.Type<typeof CartUpdateOutput>;
 export const CartUpdateOutput = Schema.Struct({
   ...Cart.fields,
   items_changelog: Schema.Struct({
-    added: Schema.Array(LineItem),
+    added: Schema.Array(ItemAddedChangelog),
   }),
 });
 

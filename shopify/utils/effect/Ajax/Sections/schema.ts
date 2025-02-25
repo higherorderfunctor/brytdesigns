@@ -20,6 +20,6 @@ export function makeResponseSchema<const T extends string>(input: T) {
   const keys = parseKeys(input);
   return Schema.Record({
     key: Schema.Literal(...keys),
-    value: Schema.String,
+    value: Schema.NullOr(Schema.String),
   });
 }
