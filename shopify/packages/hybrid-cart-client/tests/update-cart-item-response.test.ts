@@ -77,6 +77,8 @@ describe("update item cart responses", () => {
 
     const cart = await runtime.runPromise(program);
 
-    expect(cart?.data?.attributes).toEqual(AttributesResponse.attributes);
+    expect(cart?.data?.attributes.public).toEqual(
+      AttributesResponse.attributes,
+    );
   });
 });

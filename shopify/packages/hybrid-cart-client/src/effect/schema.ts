@@ -2,11 +2,42 @@ import * as Resource from "@repo/shopify-utils/effect/Resource";
 import * as AjaxSections from "@repo/shopify-utils/effect/Ajax/Sections";
 import * as Schema from "effect/Schema";
 
-export type Attributes = Schema.Schema.Type<typeof Attributes>;
-
-export const Attributes = Schema.Record({
+export type BaseAttributes = Schema.Schema.Type<typeof BaseAttributes>;
+export const BaseAttributes = Schema.Record({
   key: Schema.String,
-  value: Schema.String,
+  value: Schema.Union(
+    Schema.Null,
+    Schema.String,
+    Schema.Boolean,
+    Schema.Number,
+  ),
+});
+
+export const SplitAttributes = Schema.Struct({
+  private: BaseAttributes,
+  public: BaseAttributes,
+});
+
+export const Attributes = Schema.transform(BaseAttributes, SplitAttributes, {
+  decode(attrs) {
+    const entries = Object.entries(attrs);
+    return {
+      private: entries.reduce((attr, [key, value]) => {
+        if (!key.startsWith("_")) return attr;
+        return { ...attr, [key.substring(1)]: value };
+      }, {}),
+      public: entries.reduce((attr, [key, value]) => {
+        if (key.startsWith("_")) return attr;
+        return { ...attr, [key]: value };
+      }, {}),
+    };
+  },
+  encode(attrs) {
+    return {
+      ...attrs.private,
+      ...attrs.public,
+    };
+  },
 });
 
 export type DiscountApplication = Schema.Schema.Type<
@@ -124,7 +155,10 @@ export type LineItem = Schema.Schema.Type<typeof LineItem>;
 export const LineItem = Schema.Struct({
   id: Resource.ID,
   properties: Schema.optionalWith(Schema.NullOr(Attributes), {
-    default: () => null,
+    default: () => ({
+      private: {},
+      public: {},
+    }),
   }),
   quantity: Schema.Number,
   variant_id: Resource.ID,
@@ -172,7 +206,12 @@ export const LineItem = Schema.Struct({
 export const Cart = Schema.Struct({
   token: Schema.String,
   note: Schema.NullOr(Schema.String),
-  attributes: Attributes,
+  attributes: Schema.optionalWith(Attributes, {
+    default: () => ({
+      private: {},
+      public: {},
+    }),
+  }),
   original_total_price: Schema.Number,
   total_price: Schema.Number,
   total_discount: Schema.Number,
@@ -205,7 +244,7 @@ export type AddItemInput = Schema.Schema.Encoded<typeof AddItemInput>;
 export const AddItemInput = Schema.Struct({
   id: Resource.ID,
   quantity: Schema.optionalWith(Schema.Number, { default: () => 1 }),
-  properties: Schema.optionalWith(Attributes, { default: () => ({}) }),
+  properties: Schema.optionalWith(BaseAttributes, { default: () => ({}) }),
   selling_plan: Schema.optional(Resource.ID),
 });
 
@@ -263,6 +302,26 @@ export const CartChangeItemOptionalInput = Schema.Struct({
   selling_plan: Schema.optional(Schema.NullOr(Resource.ID)),
 }).pipe(BaseInput);
 
+export const LineItemChange = Schema.Struct({
+  product_id: Schema.Number,
+  variant_id: Schema.Number,
+  id: Schema.String,
+  image: Schema.URL,
+  price: Schema.String,
+  presentment_price: Schema.Number,
+  quantity: Schema.Number,
+  title: Schema.String,
+  product_title: Schema.String,
+  variant_title: Schema.String,
+  vendor: Schema.String,
+  product_type: Schema.String,
+  sku: Schema.String,
+  url: Schema.String,
+  untranslated_product_title: Schema.String,
+  untranslated_variant_title: Schema.String,
+  view_key: Schema.String,
+});
+
 export type CartChangeInput = Schema.Schema.Encoded<typeof CartChangeInput>;
 export const CartChangeInput = Schema.Union(
   Schema.extend(CartChangeItemOptionalInput)(
@@ -280,12 +339,8 @@ export const CartChangeInput = Schema.Union(
 export type CartChangeOutput = Schema.Schema.Type<typeof CartChangeOutput>;
 export const CartChangeOutput = Schema.Struct({
   ...Cart.fields,
-  items_added: Schema.optionalWith(Schema.Array(LineItem), {
-    default: () => [],
-  }),
-  items_removed: Schema.optionalWith(Schema.Array(LineItem), {
-    default: () => [],
-  }),
+  items_added: Schema.Array(LineItemChange),
+  items_removed: Schema.Array(LineItemChange),
 });
 
 export type CartClearInput = Schema.Schema.Encoded<typeof CartClearInput>;
