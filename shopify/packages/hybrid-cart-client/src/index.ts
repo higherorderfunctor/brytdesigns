@@ -21,6 +21,8 @@ export namespace createHybridCartClient {
   };
 }
 
+// implement custom logger layer functionality
+
 export const createHybridCartClient = (
   initOptions?: createHybridCartClient.Options,
 ) => {
@@ -36,6 +38,9 @@ export const createHybridCartClient = (
           const client = yield* HybridCartClient.make;
           return yield* client.add(input);
         }).pipe(Effect.provide(layer)),
+        {
+          signal: options?.signal,
+        },
       ),
     change: (
       input: CartChangeInput,
