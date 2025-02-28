@@ -26,7 +26,7 @@
     "@effect/platform": "^0.71.6",
     "@effect/platform-browser": "^0.50.6",
     "@repo/shopify-utils": "workspace:*",
-    "@solidifront/storefront-client": "^0.2.3",
+    "@solidifront/storefront-client": "^0.3.0",
     "effect": "^3.13.2"
   }
 }

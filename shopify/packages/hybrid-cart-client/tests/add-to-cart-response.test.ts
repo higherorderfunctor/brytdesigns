@@ -8,7 +8,7 @@ import { makeMockLayerResponse, defineGlobals } from "./utils";
 
 import { OneItemResponse, MultipleItemResponse } from "./responseData/add";
 
-describe("add item/items to cart responses", () => {
+describe("add item/items to cart responses", async () => {
   defineGlobals();
 
   it("should return a single item", async () => {
