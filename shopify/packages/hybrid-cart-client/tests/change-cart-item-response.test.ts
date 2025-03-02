@@ -1,8 +1,6 @@
-import { describe, vi, it, expect } from "vitest";
-import * as ManagedRuntime from "effect/ManagedRuntime";
-import * as Layer from "effect/Layer";
+import { describe, it, expect } from "vitest";
 import * as Effect from "effect/Effect";
-import * as HybridCartClient from "../src/effect/services/HybridCartClient";
+import * as API from "../src/effect";
 
 import { defineGlobals, makeMockLayerResponse } from "./utils";
 import {
@@ -17,22 +15,14 @@ describe("change item cart responses", () => {
   defineGlobals();
 
   it("should return a cart with an items_added array of length 1", async () => {
-    const runtime = ManagedRuntime.make(
-      Layer.mergeAll(
-        HybridCartClient.Default,
-        makeMockLayerResponse(QuantityAddedResponse),
-      ),
-    );
+    const layer = makeMockLayerResponse(QuantityAddedResponse);
 
-    const program = Effect.gen(function* () {
-      const client = yield* HybridCartClient.make;
-      return yield* client.change({
-        id: "44632334532825:694d7922f57542e3e5efd64e76235e37",
-        quantity: 2,
-      });
-    });
+    const program = API.change({
+      id: "44632334532825:694d7922f57542e3e5efd64e76235e37",
+      quantity: 2,
+    }).pipe(Effect.provide(layer));
 
-    const cart = await runtime.runPromise(program);
+    const cart = await Effect.runPromise(program);
 
     expect(cart.data?.items_added?.at(0)?.id).toEqual(
       QuantityAddedResponse.items_added.at(0)?.id,
@@ -40,22 +30,14 @@ describe("change item cart responses", () => {
   });
 
   it("should return a cart with an items_removed array of length 1", async () => {
-    const runtime = ManagedRuntime.make(
-      Layer.mergeAll(
-        HybridCartClient.Default,
-        makeMockLayerResponse(QuantityRemovedResponse),
-      ),
-    );
+    const layer = makeMockLayerResponse(QuantityRemovedResponse);
 
-    const program = Effect.gen(function* () {
-      const client = yield* HybridCartClient.make;
-      return yield* client.change({
-        id: "44632334532825:cff167159b370c03ae797b0790018d64",
-        quantity: 0,
-      });
-    });
+    const program = API.change({
+      id: "44632334532825:cff167159b370c03ae797b0790018d64",
+      quantity: 0,
+    }).pipe(Effect.provide(layer));
 
-    const cart = await runtime.runPromise(program);
+    const cart = await Effect.runPromise(program);
 
     expect(cart.data?.items_removed?.at(0)?.id).toEqual(
       QuantityRemovedResponse.items_removed.at(0)?.id,
@@ -63,24 +45,16 @@ describe("change item cart responses", () => {
   });
 
   it("first item should have a property of 'test'", async () => {
-    const runtime = ManagedRuntime.make(
-      Layer.mergeAll(
-        HybridCartClient.Default,
-        makeMockLayerResponse(PropertyAddedResponse),
-      ),
-    );
+    const layer = makeMockLayerResponse(PropertyAddedResponse);
 
-    const program = Effect.gen(function* () {
-      const client = yield* HybridCartClient.make;
-      return yield* client.change({
-        id: "44632334532825:694d7922f57542e3e5efd64e76235e37",
-        properties: {
-          test: "testing",
-        },
-      });
-    });
+    const program = API.change({
+      id: "44632334532825:694d7922f57542e3e5efd64e76235e37",
+      properties: {
+        test: "testing",
+      },
+    }).pipe(Effect.provide(layer));
 
-    const cart = await runtime.runPromise(program);
+    const cart = await Effect.runPromise(program);
 
     expect(cart.data?.items?.at(0)?.properties?.public).toHaveProperty("test");
     expect(cart.data?.items?.at(0)?.properties?.public.test).toEqual("testing");
@@ -91,24 +65,16 @@ describe("change item cart responses", () => {
   });
 
   it("first item shouldn't have any properties", async () => {
-    const runtime = ManagedRuntime.make(
-      Layer.mergeAll(
-        HybridCartClient.Default,
-        makeMockLayerResponse(PropertyRemovedResponse),
-      ),
-    );
+    const layer = makeMockLayerResponse(PropertyRemovedResponse);
 
-    const program = Effect.gen(function* () {
-      const client = yield* HybridCartClient.make;
-      return yield* client.change({
-        id: "44632334532825:4c36eea30c69476d5d743a56c1fe94fd",
-        properties: {
-          test: null,
-        },
-      });
-    });
+    const program = API.change({
+      id: "44632334532825:4c36eea30c69476d5d743a56c1fe94fd",
+      properties: {
+        test: null,
+      },
+    }).pipe(Effect.provide(layer));
 
-    const cart = await runtime.runPromise(program);
+    const cart = await Effect.runPromise(program);
     console.log(cart.data?.items?.at(0)?.properties);
 
     expect(cart.data?.items?.at(0)?.properties?.public).toHaveProperty("test");
@@ -120,25 +86,17 @@ describe("change item cart responses", () => {
   });
 
   it("should return an item with public and private properties", async () => {
-    const runtime = ManagedRuntime.make(
-      Layer.mergeAll(
-        HybridCartClient.Default,
-        makeMockLayerResponse(PublicPrivatePropertyResponse),
-      ),
-    );
+    const layer = makeMockLayerResponse(PublicPrivatePropertyResponse);
 
-    const program = Effect.gen(function* () {
-      const client = yield* HybridCartClient.make;
-      return yield* client.change({
-        id: "44632334532825:76d6ada02c889846b3d0be445145e0bc",
-        properties: {
-          test: "testing1",
-          _test: "testing2",
-        },
-      });
-    });
+    const program = API.change({
+      id: "44632334532825:76d6ada02c889846b3d0be445145e0bc",
+      properties: {
+        test: "testing1",
+        _test: "testing2",
+      },
+    }).pipe(Effect.provide(layer));
 
-    const cart = await runtime.runPromise(program);
+    const cart = await Effect.runPromise(program);
 
     expect(cart.data?.items?.at(0)?.properties?.public).toHaveProperty("test");
     expect(cart.data?.items?.at(0)?.properties?.public.test).toEqual(

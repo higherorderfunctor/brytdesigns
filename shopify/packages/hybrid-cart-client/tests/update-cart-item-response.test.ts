@@ -1,8 +1,6 @@
-import { describe, vi, it, expect } from "vitest";
-import * as ManagedRuntime from "effect/ManagedRuntime";
-import * as Layer from "effect/Layer";
+import { describe, it, expect } from "vitest";
 import * as Effect from "effect/Effect";
-import * as HybridCartClient from "../src/effect/services/HybridCartClient";
+import * as API from "../src/effect";
 
 import { defineGlobals, makeMockLayerResponse } from "./utils";
 import {
@@ -15,23 +13,15 @@ describe("update item cart responses", () => {
   defineGlobals();
 
   it("should return an update cart with a item changelog", async () => {
-    const runtime = ManagedRuntime.make(
-      Layer.mergeAll(
-        HybridCartClient.Default,
-        makeMockLayerResponse(ItemResponse),
-      ),
-    );
+    const layer = makeMockLayerResponse(ItemResponse);
 
-    const program = Effect.gen(function* () {
-      const client = yield* HybridCartClient.make;
-      return yield* client.update({
-        updates: {
-          44632334565593: 1,
-        },
-      });
-    });
+    const program = API.update({
+      updates: {
+        44632334565593: 1,
+      },
+    }).pipe(Effect.provide(layer));
 
-    const cart = await runtime.runPromise(program);
+    const cart = await Effect.runPromise(program);
 
     expect(cart.data?.items_changelog.added.at(0)).toEqual(
       ItemResponse.items_changelog.added.at(0),
@@ -39,43 +29,27 @@ describe("update item cart responses", () => {
   });
 
   it("should return a cart with an updated note", async () => {
-    const runtime = ManagedRuntime.make(
-      Layer.mergeAll(
-        HybridCartClient.Default,
-        makeMockLayerResponse(NoteResponse),
-      ),
-    );
+    const layer = makeMockLayerResponse(NoteResponse);
 
-    const program = Effect.gen(function* () {
-      const client = yield* HybridCartClient.make;
-      return yield* client.update({
-        note: "Wow",
-      });
-    });
+    const program = API.update({
+      note: "Wow",
+    }).pipe(Effect.provide(layer));
 
-    const cart = await runtime.runPromise(program);
+    const cart = await Effect.runPromise(program);
 
     expect(cart?.data?.note).toEqual(NoteResponse.note);
   });
 
   it("should return a cart with updated attributes", async () => {
-    const runtime = ManagedRuntime.make(
-      Layer.mergeAll(
-        HybridCartClient.Default,
-        makeMockLayerResponse(AttributesResponse),
-      ),
-    );
+    const layer = makeMockLayerResponse(AttributesResponse);
 
-    const program = Effect.gen(function* () {
-      const client = yield* HybridCartClient.make;
-      return yield* client.update({
-        attributes: {
-          test: "testing",
-        },
-      });
-    });
+    const program = API.update({
+      attributes: {
+        test: "testing",
+      },
+    }).pipe(Effect.provide(layer));
 
-    const cart = await runtime.runPromise(program);
+    const cart = await Effect.runPromise(program);
 
     expect(cart?.data?.attributes.public).toEqual(
       AttributesResponse.attributes,

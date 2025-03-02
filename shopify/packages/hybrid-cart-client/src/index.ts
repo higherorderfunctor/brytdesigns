@@ -1,15 +1,9 @@
-import type {
-  CartAddInput,
-  CartChangeInput,
-  CartClearInput,
-  CartGetInput,
-  CartUpdateInput,
-} from "./effect";
-
 import * as Effect from "effect/Effect";
 import * as Logger from "effect/Logger";
-
-import * as HybridCartClient from "./effect/services/HybridCartClient";
+import * as Layer from "effect/Layer";
+import * as LogLevel from "effect/LogLevel";
+import * as API from "./effect";
+import * as AjaxRequest from "./effect/services/AjaxRequest";
 
 export namespace createHybridCartClient {
   export type Options = {
@@ -21,89 +15,67 @@ export namespace createHybridCartClient {
   };
 }
 
-// implement custom logger layer functionality
+export const createHybridCartApi = ({
+  logger,
+}: createHybridCartClient.Options = {}) => {
+  let baseLayer = Layer.empty;
+  let minimumLogLevel = LogLevel.None;
+  let loggerLayer = Logger.pretty;
 
-export const createHybridCartClient = (
-  initOptions?: createHybridCartClient.Options,
-) => {
-  const layer = HybridCartClient.Default;
+  if (logger) {
+    loggerLayer = Logger.replace(Logger.defaultLogger, Logger.make(logger));
+    baseLayer = Layer.mergeAll(loggerLayer);
+    minimumLogLevel = LogLevel.All;
+  }
+
+  const ajaxLayer = Layer.mergeAll(baseLayer, AjaxRequest.Default);
 
   return {
     add: (
-      input: CartAddInput,
+      input: API.add.Input,
       options?: createHybridCartClient.RequestOptions,
     ) =>
-      Effect.runPromise(
-        Effect.gen(function* () {
-          const client = yield* HybridCartClient.make;
-          return yield* client.add(input);
-        }).pipe(Effect.provide(layer)),
-        {
-          signal: options?.signal,
-        },
-      ),
+      Effect.runPromise(API.add(input).pipe(Effect.provide(ajaxLayer)), {
+        signal: options?.signal,
+      }),
     change: (
-      input: CartChangeInput,
+      input: API.change.Input,
       options?: createHybridCartClient.RequestOptions,
     ) =>
-      Effect.runPromise(
-        Effect.gen(function* () {
-          const client = yield* HybridCartClient.make;
-          return yield* client.change(input);
-        }).pipe(Effect.provide(layer)),
-        {
-          signal: options?.signal,
-        },
-      ),
+      Effect.runPromise(API.change(input).pipe(Effect.provide(ajaxLayer)), {
+        signal: options?.signal,
+      }),
     clear: (
-      input: CartClearInput,
+      input: API.clear.Input,
       options?: createHybridCartClient.RequestOptions,
     ) =>
-      Effect.runPromise(
-        Effect.gen(function* () {
-          const client = yield* HybridCartClient.make;
-          return yield* client.clear(input);
-        }).pipe(Effect.provide(layer)),
-        {
-          signal: options?.signal,
-        },
-      ),
+      Effect.runPromise(API.clear(input).pipe(Effect.provide(ajaxLayer)), {
+        signal: options?.signal,
+      }),
+
     get: (
-      input: CartGetInput,
+      input: API.get.Input,
       options?: createHybridCartClient.RequestOptions,
     ) =>
-      Effect.runPromise(
-        Effect.gen(function* () {
-          const client = yield* HybridCartClient.make;
-          return yield* client.get(input);
-        }).pipe(Effect.provide(layer)),
-        {
-          signal: options?.signal,
-        },
-      ),
+      Effect.runPromise(API.get(input).pipe(Effect.provide(ajaxLayer)), {
+        signal: options?.signal,
+      }),
+
     update: (
-      input: CartUpdateInput,
+      input: API.update.Input,
       options?: createHybridCartClient.RequestOptions,
     ) =>
-      Effect.runPromise(
-        Effect.gen(function* () {
-          const client = yield* HybridCartClient.make;
-          return yield* client.update(input);
-        }).pipe(Effect.provide(layer)),
-        {
-          signal: options?.signal,
-        },
-      ),
+      Effect.runPromise(API.update(input).pipe(Effect.provide(ajaxLayer)), {
+        signal: options?.signal,
+      }),
+
     discounts: {
       update: (
-        discountCodes: string[],
+        input: API.discounts.update["Input"],
         options?: createHybridCartClient.RequestOptions,
       ) =>
         Effect.runPromise(
-          Effect.gen(function* () {
-            const client = yield* HybridCartClient.make;
-            return yield* client.discounts.update(discountCodes);
-          }).pipe(Effect.provide(layer)),
+          API.discounts.update(input).pipe(Effect.provide(baseLayer)),
           {
             signal: options?.signal,
           },
