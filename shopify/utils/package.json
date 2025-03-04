@@ -2,6 +2,7 @@
   "name": "@repo/shopify-utils",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "clean": "git clean -xdf .cache .turbo dist node_modules"
@@ -13,6 +14,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "effect": "^3.13.2"
+    "effect": "3.13.4"
   }
 }

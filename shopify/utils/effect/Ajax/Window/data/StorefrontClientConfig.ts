@@ -1,4 +1,4 @@
-import type { IStorefrontClientConfig } from "./types";
+import type { IStorefrontClientConfig } from "./types.js";
 
 import * as Data from "effect/Data";
 

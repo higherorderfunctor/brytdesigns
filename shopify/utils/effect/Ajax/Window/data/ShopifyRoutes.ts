@@ -1,4 +1,4 @@
-import type { IShopifyRoutes } from "./types";
+import type { IShopifyRoutes } from "./types.js";
 
 import * as Data from "effect/Data";
 

@@ -1,15 +1,17 @@
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 import * as StorefrontClient from "@solidifront/storefront-client/effect";
+import type { Channel, Sink, Stream } from "effect";
+import type { NodeInspectSymbol } from "effect/Inspectable";
 
 import * as Resource from "@repo/shopify-utils/effect/Resource";
 import { StorefrontClientConfig } from "@repo/shopify-utils/effect/Ajax";
 
-import * as LoggerUtils from "../logger/LoggerUtils";
-import * as AjaxClientResponse from "../data/AjaxClientResponse";
-import { CartError } from "../errors";
-import { CartGet } from ".";
-import { CartUpdateDiscountsInput } from "../schema";
+import * as LoggerUtils from "../logger/LoggerUtils.js";
+import * as AjaxClientResponse from "../data/AjaxClientResponse.js";
+import * as CartGet from "./CartGet.js";
+import { CartError } from "../errors.js";
+import { CartUpdateDiscountsInput } from "../schema.js";
 
 const updateCartDiscountCodesMutation = `#graphql
   mutation updateCartDiscounts($id: ID!, $discountCodes: [String!]) {
@@ -25,13 +27,15 @@ const updateCartDiscountCodesMutation = `#graphql
 export type Input = CartUpdateDiscountsInput;
 
 export const make = (discountCodes: CartUpdateDiscountsInput) =>
-  Effect.gen(function* () {
+  Effect.gen(function*() {
     const config = new StorefrontClientConfig();
+
     const client = yield* StorefrontClient.make({
       storeName: config.shopName,
       publicAccessToken: config.accessToken,
       apiVersion: config.apiVersion as any,
     });
+
     const codes = yield* Schema.decode(CartUpdateDiscountsInput)(discountCodes);
 
     const initialCart = yield* CartGet.make();

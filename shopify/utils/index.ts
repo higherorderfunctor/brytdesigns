@@ -4,4 +4,4 @@ export {
   type GID,
   type ID,
   type Type,
-} from "./resources";
+} from "./resources/index.js";

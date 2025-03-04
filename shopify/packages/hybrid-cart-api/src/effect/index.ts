@@ -1,11 +1,9 @@
-import {
-  CartAdd,
-  CartChange,
-  CartClear,
-  CartDiscountsUpdate,
-  CartGet,
-  CartUpdate,
-} from "./api";
+import * as CartAdd from "./api/CartAdd.js";
+import * as CartChange from "./api/CartChange.js";
+import * as CartClear from "./api/CartClear.js";
+import * as CartGet from "./api/CartGet.js";
+import * as CartUpdate from "./api/CartUpdate.js";
+import * as CartDiscountsUpdate from "./api/CartDiscountsUpdate.js";
 
 export namespace add {
   export type Input = CartAdd.Input;

@@ -69,17 +69,17 @@ export const createHybridCartApi = ({
         signal: options?.signal,
       }),
 
-    discounts: {
-      update: (
-        input: API.discounts.update["Input"],
-        options?: createHybridCartClient.RequestOptions,
-      ) =>
-        Effect.runPromise(
-          API.discounts.update(input).pipe(Effect.provide(baseLayer)),
-          {
-            signal: options?.signal,
-          },
-        ),
-    },
+    // discounts: {
+    //   update: (
+    //     input: API.discounts.update["Input"],
+    //     options?: createHybridCartClient.RequestOptions,
+    //   ) =>
+    //     Effect.runPromise(
+    //       API.discounts.update(input).pipe(Effect.provide(baseLayer)),
+    //       {
+    //         signal: options?.signal,
+    //       },
+    //     ),
+    // },
   };
 };
