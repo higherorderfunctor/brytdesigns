@@ -4,6 +4,9 @@ import * as CartClear from "./api/CartClear.js";
 import * as CartGet from "./api/CartGet.js";
 import * as CartUpdate from "./api/CartUpdate.js";
 import * as CartDiscountsUpdate from "./api/CartDiscountsUpdate.js";
+import type { CartUpdateDiscountsInput } from "./schema.js";
+import type { Effect } from "effect";
+import type { CartError } from "./errors.js";
 
 export namespace add {
   export type Input = CartAdd.Input;
@@ -36,6 +39,8 @@ export namespace discounts {
   };
 }
 
-export const discounts = {
+export const discounts: {
+  update: (discountCodes: CartUpdateDiscountsInput) => Effect.Effect<Effect.Effect.Success<ReturnType<typeof CartGet.make>>, Effect.Effect.Error<ReturnType<typeof CartGet.make>> | CartError | CartDiscountsUpdate.ExtractOperationNameError>
+} = {
   update: CartDiscountsUpdate.make,
 };

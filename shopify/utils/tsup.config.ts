@@ -18,34 +18,34 @@ export default defineConfig([
   {
     ...commonConfig,
     format: "esm",
-    entry: ["src/effect/index.ts"],
+    entry: ["effect/index.ts"],
     outDir: `${outDir}/effect`,
     async onSuccess() {
       const [effectDts] = generateDtsBundle([
         {
-          filePath: path.resolve("./src/effect/index.ts"),
+          filePath: path.resolve("effect", "./index.ts"),
         },
-      ], { preferredConfigPath: "./tsconfig.json"});
+      ]);
 
-      await fs.writeFile(
-        path.resolve(outDir, "effect", "index.d.ts"),
-        effectDts,
-      );
+      await fs.writeFile(path.resolve(outDir, "effect", "index.d.ts"), effectDts);
     },
   },
   {
     ...commonConfig,
     format: "esm",
-    entry: ["src/index.ts"],
+    entry: ["index.ts"],
     outDir: outDir,
     async onSuccess() {
-      const [indexDts] = generateDtsBundle([
+      const [dts] = generateDtsBundle([
         {
-          filePath: path.resolve("./src/index.ts"),
+          filePath: path.resolve("./index.ts"),
         },
       ], { preferredConfigPath: "./tsconfig.json"});
 
-      await fs.writeFile(path.resolve(outDir, "index.d.ts"), indexDts);
+      await fs.writeFile(
+        path.resolve(outDir, "index.d.ts"),
+        dts,
+      );
     },
   },
 ]);

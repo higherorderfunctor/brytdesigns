@@ -1,8 +1,6 @@
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 import * as StorefrontClient from "@solidifront/storefront-client/effect";
-import type { Channel, Sink, Stream } from "effect";
-import type { NodeInspectSymbol } from "effect/Inspectable";
 
 import * as Resource from "@repo/shopify-utils/effect/Resource";
 import { StorefrontClientConfig } from "@repo/shopify-utils/effect/Ajax";
@@ -12,6 +10,15 @@ import * as AjaxClientResponse from "../data/AjaxClientResponse.js";
 import * as CartGet from "./CartGet.js";
 import { CartError } from "../errors.js";
 import { CartUpdateDiscountsInput } from "../schema.js";
+import type { Types } from "effect";
+import type { CartUserError } from '@solidifront/codegen/storefront-api-types';
+
+export type ExtractOperationNameError = Types.ExtractTag<
+  Effect.Effect.Error<ReturnType<
+    Effect.Effect.Success<ReturnType<typeof StorefrontClient.make>>['query']
+  >>,
+  'ExtractOperationNameError'
+>;
 
 const updateCartDiscountCodesMutation = `#graphql
   mutation updateCartDiscounts($id: ID!, $discountCodes: [String!]) {
@@ -26,7 +33,10 @@ const updateCartDiscountCodesMutation = `#graphql
 
 export type Input = CartUpdateDiscountsInput;
 
-export const make = (discountCodes: CartUpdateDiscountsInput) =>
+export const make = (discountCodes: CartUpdateDiscountsInput): Effect.Effect<
+  Effect.Effect.Success<ReturnType<typeof CartGet.make>>,
+  Effect.Effect.Error<ReturnType<typeof CartGet.make>> | CartError | ExtractOperationNameError
+> =>
   Effect.gen(function*() {
     const config = new StorefrontClientConfig();
 
@@ -82,7 +92,7 @@ export const make = (discountCodes: CartUpdateDiscountsInput) =>
           status: 500,
           message: "Failed to update cart discount codes",
           description:
-            response.data?.cartDiscountCodesUpdate?.userErrors
+            (response.data?.cartDiscountCodesUpdate?.userErrors as Pick<CartUserError, "message" | "field">[])
               .map((error) => error.message)
               .join(", ") || "No errors reported",
         }),

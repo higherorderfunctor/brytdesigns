@@ -65,9 +65,15 @@ importers:
 
   shopify/utils:
     dependencies:
+      dts-bundle-generator:
+        specifier: ^9.5.1
+        version: 9.5.1
       effect:
         specifier: 3.13.4
         version: 3.13.4
+      tsup:
+        specifier: ^8.4.0
+        version: 8.4.0(jiti@2.4.2)(postcss@8.5.3)(typescript@5.8.2)(yaml@2.7.0)
 
 packages:
 
